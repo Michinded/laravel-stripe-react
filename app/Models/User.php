@@ -46,4 +46,30 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+
+    /**
+     * Boot the model and its traits.
+     * 
+     * This method automatically creates a Stripe customer for every new user
+     * by registering a "created" event listener. The listener calls
+     * createAsStripeCustomer() on each newly created user instance.
+     * 
+     * NOTE: This affects ALL user creation across the application.
+     * If you need selective Stripe customer creation, consider:
+     * 1. Removing this global listener
+     * 2. Manually calling createAsStripeCustomer() where needed
+     * 3. Creating a separate trait or service for Stripe customer creation
+     * 
+     * @see \Laravel\Cashier\Billable::createAsStripeCustomer()
+     * @return void
+     */
+    // Override create method to create stripe customer
+    protected static function booted(): void
+    {
+        static::created(function ($user) {
+            // Create a Stripe customer when a new user is created
+            $user->createAsStripeCustomer();
+        });
+    }
 }
