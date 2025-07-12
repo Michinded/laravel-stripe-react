@@ -84,10 +84,17 @@ class User extends Authenticatable
          * @param User $customer The updated user model instance
          * @return void
          */
-        static::updated(queueable(function (User $customer) {
+        static::updated(function (User $customer) {
             if ($customer->hasStripeId()) {
-                $customer->syncStripeCustomerDetails();
+            $customer->syncStripeCustomerDetails();
             }
-        }));
+        });
+
+        // If you want to use the queueable method, uncomment the following line:
+        // static::updated(queueable(function (User $customer) {
+        //     if ($customer->hasStripeId()) {
+        //         $customer->syncStripeCustomerDetails();
+        //     }
+        // }));
     }
 }
