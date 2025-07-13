@@ -34,25 +34,38 @@ class PaymentController extends Controller
      * Function to generate a new setup intent.
      * This can be used to create a new payment method.
      */
-    public function createSetupIntent(){
+    public function createSetupIntent()
+    {
+        try {
+            // Refresh user authentication
+            auth()->user()->refresh();
 
-        // Refresh user authentication to ensure the user is logged in
-        auth()->user()->refresh();
-        
-        // Ensure the user is authenticated
-        if (!auth()->check()) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+            // Ensure the user is authenticated
+            if (!auth()->check()) {
+                return response()->json([
+                    'error' => 'Unauthorized',
+                    'message' => 'User session expired'
+                ], 401);
+            }
+
+            // Check if the user has a Stripe customer ID
+            if (!auth()->user()->stripe_id) {
+                return response()->json([
+                    'error' => 'No Stripe customer ID found',
+                    'message' => 'Payment account setup required'
+                ], 400);
+            }
+
+            $intent = auth()->user()->createSetupIntent();
+
+            return response()->json([
+                'client_secret' => $intent->client_secret,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Server error',
+                'message' => 'Unable to process payment setup'
+            ], 500);
         }
-        // Check if the user has a Stripe customer ID
-        if (!auth()->user()->stripe_id) {
-            return response()->json(['error' => 'No Stripe customer ID found'], 400);
-        }
-
-        // Create a new setup intent for the authenticated user
-        $intent = auth()->user()->createSetupIntent();
-
-        return response()->json([
-            'client_secret' => $intent->client_secret,
-        ]);
     }
 }
