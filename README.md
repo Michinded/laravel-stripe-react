@@ -2,6 +2,8 @@
 
 > A modern, full-stack starter kit featuring Laravel 12, React 19, Inertia.js, and Stripe integration. Perfect for building SaaS applications, subscription services, or any project requiring payments.
 
+**[🇲🇽-🇪🇸 Versión en Español](README_ES.md)**
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Laravel](https://img.shields.io/badge/Laravel-12.x-red.svg)](https://laravel.com)
 [![React](https://img.shields.io/badge/React-19.x-blue.svg)](https://reactjs.org)
