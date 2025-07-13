@@ -43,7 +43,7 @@ function PaymentForm({ onSuccess, onError }: PaymentFormProps) {
     const resetForm = () => {
         setCardholderName('');
         setError(null);
-        
+
         // Limpiar el CardElement
         const cardElement = elements?.getElement(CardElement);
         if (cardElement) {
@@ -63,14 +63,29 @@ function PaymentForm({ onSuccess, onError }: PaymentFormProps) {
             });
 
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                const errorData = await response.json().catch(() => ({}));
+
+                // Use the backend error message if available or use generic messages based on status
+                const errorMessage = errorData.message || (() => {
+                    switch (response.status) {
+                        case 401:
+                            return 'Your session has expired. Please log in again.';
+                        case 400:
+                            return 'Invalid request. Please refresh the page and try again.';
+                        case 500:
+                            return 'Server error. Please try again in a few minutes.';
+                        default:
+                            return 'Failed to initialize payment setup. Please try again.';
+                    }
+                })();
+
+                throw new Error(errorMessage);
             }
 
             const data = await response.json();
 
-            // Aquí está la corrección: extraer client_secret del objeto
             if (!data.client_secret) {
-                throw new Error('No client_secret received from server');
+                throw new Error('Payment setup failed. Please try again.');
             }
 
             return data.client_secret;
@@ -101,7 +116,6 @@ function PaymentForm({ onSuccess, onError }: PaymentFormProps) {
         try {
             // Crear Setup Intent dinámicamente
             const clientSecret = await createSetupIntent();
-            console.log('Client secret:', clientSecret);
 
             // Confirmar el Setup Intent con Stripe
             const { error, setupIntent } = await stripe.confirmCardSetup(
@@ -117,18 +131,15 @@ function PaymentForm({ onSuccess, onError }: PaymentFormProps) {
             );
 
             if (error) {
-                console.error('Stripe error:', error);
-                setError(error.message || 'An error occurred');
-                onError?.(error.message || 'An error occurred');
+                setError(error.message || 'Payment setup failed. Please check your card details and try again.');
+                onError?.(error.message || 'Payment setup failed');
             } else {
-                console.log('Setup successful!', setupIntent);
                 setSuccess(true);
                 resetForm();
                 onSuccess?.();
             }
         } catch (err) {
-            console.error('General error:', err);
-            const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
+            const errorMessage = err instanceof Error ? err.message : 'Unable to process payment. Please try again later.';
             setError(errorMessage);
             onError?.(errorMessage);
         } finally {
@@ -153,7 +164,7 @@ function PaymentForm({ onSuccess, onError }: PaymentFormProps) {
                                 Your payment method has been saved successfully.
                             </p>
                         </div>
-                        <Button 
+                        <Button
                             onClick={handleAddAnother}
                             variant="outline"
                             className="w-full"
@@ -189,11 +200,11 @@ function PaymentForm({ onSuccess, onError }: PaymentFormProps) {
                     <div className="space-y-2">
                         <Label>Card Information</Label>
                         <div className="p-3 border rounded-md">
-                            <CardElement 
+                            <CardElement
                                 options={{
                                     ...cardElementOptions,
                                     disabled: isLoading
-                                }} 
+                                }}
                             />
                         </div>
                     </div>
