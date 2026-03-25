@@ -3,6 +3,7 @@ import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 import AddPaymentMethod from './components/add-payment-method';
+import PaymentMethods from './components/payment-methods-list';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -13,15 +14,43 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 interface PaymentIndexProps {
     stripeKey: string;
+    defaultPaymentMethodId?: string;
 }
 
-export default function PaymentIndex({ stripeKey }: PaymentIndexProps) {
+export default function PaymentIndex({ stripeKey, defaultPaymentMethodId }: PaymentIndexProps) {
     const handlePaymentSuccess = () => {
-        // Optional: show success notification or other action
+        // Opcional: recargar métodos de pago o mostrar notificación
+        window.location.reload(); // Temporal, se puede mejorar con estado reactivo
     };
 
     const handlePaymentError = (error: string) => {
-        // Optional: show error notification or handle error
+        // Opcional: mostrar notificación de error
+        console.error('Payment error:', error);
+    };
+
+    const handleSetDefaultPayment = async (paymentMethodId: string) => {
+        try {
+            // TODO: Implementar API call para cambiar método predeterminado
+            console.log('Setting default payment method:', paymentMethodId);
+            // await fetch('/payment/set-default', { method: 'POST', body: JSON.stringify({ paymentMethodId }) });
+        } catch (error) {
+            console.error('Error setting default payment method:', error);
+        }
+    };
+
+    const handleEditPayment = (paymentMethodId: string) => {
+        // TODO: Implementar modal de edición
+        console.log('Editing payment method:', paymentMethodId);
+    };
+
+    const handleDeletePayment = async (paymentMethodId: string) => {
+        try {
+            // TODO: Implementar API call para eliminar método de pago
+            console.log('Deleting payment method:', paymentMethodId);
+            // await fetch(`/payment/payment-methods/${paymentMethodId}`, { method: 'DELETE' });
+        } catch (error) {
+            console.error('Error deleting payment method:', error);
+        }
     };
 
     return (
@@ -104,28 +133,12 @@ export default function PaymentIndex({ stripeKey }: PaymentIndexProps) {
                 </div>
 
                 {/* Saved Payment Methods Section */}
-                <div className="space-y-4">
-                    <div className="space-y-2">
-                        <h2 className="text-2xl font-bold">Saved Payment Methods</h2>
-                        <p className="text-muted-foreground">
-                            View and manage your saved payment methods.
-                        </p>
-                    </div>
-                    <div className="relative min-h-[200px] overflow-hidden rounded-xl border bg-card p-6">
-                        <div className="flex flex-col items-center justify-center h-full text-center space-y-3">
-                            <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-                                <svg className="w-6 h-6 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                                </svg>
-                            </div>
-                            <div className="space-y-1">
-                                <p className="text-sm font-medium">No payment methods saved</p>
-                                <p className="text-xs text-muted-foreground">Add a payment method above to get started</p>
-                            </div>
-                        </div>
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/10 dark:stroke-neutral-100/10 -z-10" />
-                    </div>
-                </div>
+                <PaymentMethods
+                    defaultPaymentMethodId={defaultPaymentMethodId}
+                    onSetDefault={handleSetDefaultPayment}
+                    onEdit={handleEditPayment}
+                    onDelete={handleDeletePayment}
+                />
 
                 {/* Billing History Section */}
                 <div className="space-y-4">

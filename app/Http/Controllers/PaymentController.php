@@ -68,4 +68,28 @@ class PaymentController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Show the user payment methods
+     */
+
+    public function getPaymentMethods(){
+        // Refresh user authentication
+        auth()->user()->refresh();
+
+        // Ensure the user is authenticated
+        if (!auth()->check()) {
+            return response()->json([
+                'error' => 'Unauthorized',
+                'message' => 'User session expired'
+            ], 401);
+        }
+
+        // Retrieve payment methods
+        $paymentMethods = auth()->user()->paymentMethods();
+
+        return response()->json([
+            'paymentMethods' => $paymentMethods,
+        ]);
+    }
 }

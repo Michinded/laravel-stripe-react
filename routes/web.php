@@ -18,6 +18,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware(['auth'])->prefix('payment')->group(function () {
     Route::get('/', [PaymentController::class, 'index'])->name('payment.index');
     Route::get('/create-setup-intent', [PaymentController::class, 'createSetupIntent'])->name('payment.createSetupIntent');
+    Route::get('/payment-methods', [PaymentController::class, 'getPaymentMethods'])->name('payment.getPaymentMethods');
 });
 
 
